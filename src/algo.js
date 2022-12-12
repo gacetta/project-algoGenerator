@@ -1,26 +1,45 @@
 class Algo {
-  constructor(name, description, args, run) {
+  constructor(name, description, args, funcBody) {
     this.name = name,
     this.description = description,
     this.args = args,
-    this.run = run
+    this.funcBody = funcBody
   }
 }
 
 const algos = [];
 
-const getAlgos = () => algos;
+const add5 = new Algo(
+  'add5', 
+  'Takes one argument of type number.  add5 returns the sum of the provided number and 5', 
+  ['number'],
+  ((num) => (num + 5))
+);
+const isEven = new Algo(
+  'isEven',
+  'Takes one argument of type number.  isEven returns a boolean: true if provided number is even, false if odd',
+  ['number'],
+  (num) => num % 2 === 0
+)
 
-const add5 = new Algo('add5', 'add 5 to the provided number',[100], ((num) => (num + 5)));
-const filter = new Algo('square', 'square the provided number', [3], (num) => num*num);
-const reduce = new Algo('addNums', 'return the sum of the provided numbers', [1, 10], (num1, num2) => num1 + num2);
+const sumAll = new Algo(
+  'sumAll',
+  'Takes any number of arguments of type number.  sumAll returns the sum of all provided numbers',
+  ['any amount of numbers'],
+  function(...num) {
+    if (num.length < 1) return 0;
+    return num.reduce((acc, curr) => acc + curr, 0)
+  }
+)
 
 algos.push(add5)
-algos.push(filter)
-algos.push(reduce)
+algos.push(isEven)
+algos.push(sumAll)
 
 function getAlgo(algoName) {
   return algos.find((algo) => algo.name === algoName);
 }
+
+const getAlgos = () => algos;
 
 export { getAlgos, Algo, getAlgo}
