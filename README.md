@@ -13,11 +13,11 @@ Then `npm run dev-server` will open the app in a new window in your browser to t
 format algorithm as an object and export as default.
 Function object should contain the following info:
 
-const functionName = {
-  name: 'function name here',
-  description: 'provide a description of required arguments and what function does',
-  args: an array containing all the expected arguments in order and what datatype they should be e.g ['number', 'array', 'boolean'],
-  funcBody: 'your function goes here'
-}
+    const functionName = {
+      name: 'function name here',
+      description: 'provide a description of required arguments and what function does',
+      args: an array containing all the expected arguments in order and what datatype they should be e.g ['number', 'number', 'boolean'],
+      funcBody: 'your function goes here'
+    }
 
-export { functionName as default }
+    export { functionName as default }
