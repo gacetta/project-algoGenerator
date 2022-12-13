@@ -1,11 +1,11 @@
-import { getAlgos, Algo, getAlgo } from './algo'
+import { getAlgos, getAlgo } from './algo'
 
 const algos = getAlgos();
 console.log(algos);
 let currentAlgo;
 
-setCurrentAlgo('add5');
-console.log(currentAlgo.args)
+// setCurrentAlgo('add5');
+// console.log(currentAlgo.args)
 
 generateDropdownEl(algos);
 
@@ -21,14 +21,19 @@ function generateDropdownEl(algoArr) {
   const labelEl = document.createElement('label');
   const dropdownMenuEl = document.createElement('select');
 
+  //setup container
+  dropdownEl.setAttribute('id','algo__select--container');
+  dropdownEl.classList.add('main-container')
+
   // setup label
-  labelEl.classList.add('dropdown__label')
+  labelEl.setAttribute('id', 'dropdown__label')
   labelEl.textContent = 'Choose an algorithm to display:';
   dropdownEl.append(labelEl);
 
   // setup dropdown menu with default option
   dropdownMenuEl.setAttribute('name', 'algo-names');
-  dropdownMenuEl.setAttribute('id', 'set-algo');
+  dropdownMenuEl.setAttribute('id', 'dropdown__menu');
+  dropdownMenuEl.classList.add('input-handler')
   dropdownMenuEl.required = true;
   
   const defaultOption = generateOptionEl('Select an algo');
@@ -70,17 +75,25 @@ function renderDescription(currentAlgo) {
   const algoArgumentsEl = document.createElement('div');
   const algoDescriptionEl = document.createElement('p');
 
+  // setup container
+  algoDescriptionContainerEl.setAttribute('id', 'algo__description--container');
+  algoDescriptionContainerEl.classList.add('main-container')
+
   // setup algoName
   algoNameEl.textContent = currentAlgo.name;
+  algoNameEl.setAttribute('id', 'algo__description--name');
 
   // setup algoDescription
   algoDescriptionEl.textContent = currentAlgo.description;
+  algoDescriptionEl.setAttribute('id', 'description')
 
   // setup algoArguments
   const argumentsLabelEl = document.createElement('h3');
   const argumentsValueEl = document.createElement('span');
   argumentsLabelEl.textContent = 'Argument(s): ';
+  argumentsLabelEl.setAttribute('id', 'algo__description--arguments-label');
   argumentsValueEl.textContent = currentAlgo.args;
+  argumentsValueEl.setAttribute('id', 'algo__description--arguments-value');
   argumentsLabelEl.append(argumentsValueEl)
   algoArgumentsEl.append(argumentsLabelEl);
 
@@ -98,18 +111,23 @@ function renderAlgoRuntime(currentAlgo) {
   const algoRuntimeContainerEl = document.createElement('div');
   const algoRuntimeLabelEl = document.createElement('label');
   const algoRuntimeInputEl = document.createElement('input');
-  const algoRuntimeResultEl = document.createElement('p');
+  const algoRuntimeResultEl = document.createElement('div');
   const algoRuntimeButtonEl = document.createElement('input');
+
+  // setup container
+  algoRuntimeContainerEl.setAttribute('id', 'algo__runtime--container')
+  algoRuntimeContainerEl.classList.add('main-container')
   
   // setup label
   algoRuntimeLabelEl.textContent = 'Enter arguments here:';
   algoRuntimeLabelEl.setAttribute('for', 'arguments');
-  algoRuntimeInputEl.setAttribute('id', 'algoLabel');
+  algoRuntimeLabelEl.setAttribute('id', 'algoLabel');
 
   // create text input
   algoRuntimeInputEl.setAttribute('type', 'text');
   algoRuntimeInputEl.setAttribute('id', 'arguments');
   algoRuntimeInputEl.setAttribute('name', 'arguments');
+  algoRuntimeInputEl.classList.add('input-handler')
   algoRuntimeInputEl.setAttribute('placeholder', currentAlgo.args)
 
   // create result element
@@ -118,6 +136,7 @@ function renderAlgoRuntime(currentAlgo) {
   // create submit button
   algoRuntimeButtonEl.setAttribute('type', 'submit');
   algoRuntimeButtonEl.setAttribute('value', 'Run Algorithm');
+  algoRuntimeButtonEl.classList.add('input-handler')
   algoRuntimeButtonEl.setAttribute('id', 'submit-button')
   
   algoRuntimeContainerEl.append(

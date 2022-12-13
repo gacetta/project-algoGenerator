@@ -1,6 +1,7 @@
 const add5 = {
   name: 'add5',
-  description: 'This function takes a single argument of type number, adds 5, and returns the result',
+  description: 'Takes one argument of type number.  \nadd5 returns the sum of the provided number and 5',
+  args: ['number'],
   funcBody: (num) => num + 5
 }
 
