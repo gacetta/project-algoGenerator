@@ -2,11 +2,12 @@ const add5 = require("../fake_backend/add5");
 const isEven = require("../fake_backend/isEven");
 const isPrime = require("../fake_backend/isPrime");
 const square = require("../fake_backend/square");
+const fibonacciNumber = require("../fake_backend/fibonacciNumber");
 // const sumAll = require("../fake_backend/sumAll");
 
 const algoController = {};
 
-const algos = [add5, isEven, isPrime, square];
+const algos = [add5, isEven, isPrime, square, fibonacciNumber];
 
 // MIDDLEWARE TO GET A SPECIFIC ALGO BY NAME
 algoController.getAlgo = (req, res, next) => {

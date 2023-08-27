@@ -24,13 +24,13 @@ function getAlgo(id) {
     });
 }
 
-// renderAlgoSelect
+// render dropdown to select algorithm
 function renderAlgoSelect(algoArr) {
   const algoSelect = document.querySelector("#algo__select");
   const labelEl = document.createElement("label");
   const dropdownMenuEl = document.createElement("select");
 
-  // setup label
+  // setup dropdown label
   labelEl.setAttribute("id", "algo__select--label");
   labelEl.classList.add("header-medium");
   labelEl.setAttribute("for", "algo-names");
@@ -42,7 +42,7 @@ function renderAlgoSelect(algoArr) {
   dropdownMenuEl.classList.add("input-handler");
   dropdownMenuEl.required = true;
 
-  // setup default option
+  // setup default option (disabled and selected placeholder)
   const defaultOption = generateOptionEl({ name: "Select an algo", id: null });
   defaultOption.disabled = true;
   defaultOption.selected = true;
@@ -64,7 +64,7 @@ function renderAlgoSelect(algoArr) {
   });
 }
 
-// generateOptionEl
+// generate an option element for the dropdown menu
 function generateOptionEl(algo) {
   const algoEl = document.createElement("option");
   algoEl.textContent = algo.name;
@@ -72,7 +72,8 @@ function generateOptionEl(algo) {
   return algoEl;
 }
 
-// renderDescription - side-effects: Modifies DOM
+// render the description of the algorithm and the arguments
+// side-effects: modifies DOM
 function renderDescription(currentAlgo) {
   const descriptionSection = document.querySelector("#algo__description");
   const algoContainerEl = document.createElement("div");
@@ -88,23 +89,24 @@ function renderDescription(currentAlgo) {
   algoNameEl.setAttribute("id", "algo__description--name");
   algoNameEl.classList.add("header-large");
 
-  // setup algoArguments
+  // setup algo arguments
   const plural = currentAlgo.args.length > 1 ? "s" : "";
   algoArgumentsEl.textContent = `Argument${plural}: ${currentAlgo.args}`;
   algoArgumentsEl.setAttribute("id", "algo__description--args");
   algoArgumentsEl.classList.add("header-small");
 
-  // setup algoDescription
+  // setup algo description
   algoDescriptionEl.textContent = currentAlgo.description;
   algoDescriptionEl.setAttribute("id", "algo__description--body");
 
-  // // add all to DOM
+  // add all to the DOM
   descriptionSection.innerHTML = "";
   algoContainerEl.append(algoNameEl, algoArgumentsEl, algoDescriptionEl);
   descriptionSection.append(algoContainerEl);
 }
 
-// renderAlgoRuntime - side-effects: modifies DOM
+// render input fields and submit button
+// side-effects: modifies DOM
 function renderAlgoRuntime(currentAlgo) {
   // const algoRuntimeContainerEl = document.createElement('div');
   const algoRuntimeSection = document.querySelector("#algo__runtime");
@@ -166,61 +168,108 @@ function renderAlgoRuntime(currentAlgo) {
 
   // submit button event listener
   document.querySelector("#submit-button").addEventListener("click", (e) => {
-    // args to be passed to our selected algo
-    const argArr = [];
+    const currentArgs = processArgs(currentAlgo);
+    let db;
 
-    // data sanitization (for now - make every argument a number and push to argArr)
-    currentAlgo.args.forEach((arg, index) => {
-      const dataType = arg;
-      const inputValueAsStr = document.querySelector(`#arg${index}`).value;
-      // const inputValueTyped = processData(dataType, inputValueAsStr)
-      const inputValueTyped = Number(inputValueAsStr);
-      argArr.push(inputValueTyped);
-    });
+    // getCachedResult()
 
-    // invoke currentAlgo
-    fetch(`/algos/${currentAlgo.id}/run`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        args: argArr,
-      }),
-    })
-      .then((response) => response.json())
-      .then((result) => {
-        // render result to #result
-        const resultEl = document.querySelector("#result");
-        const resultContainerEl = document.createElement("div");
-        const resultSummaryEl = document.createElement("p");
-        const resultValueEl = document.createElement("p");
+    function getCachedResult(algoID, args) {
+      // check that DB exists - if not, createDB()
+      // get result from DB, and return that value
+      // if no document exists, return null
+    }
 
-        // setup result container
-        resultContainerEl.setAttribute("id", "result-container");
+    // create a DB
+    function createDB() {
+      const request = window.indexedDB.open("algoGeneratorDB");
+      request.onerror = (e) => {
+        console.log(
+          "an error occurred while opening the indexedDB:",
+          e.target.errorCode
+        );
+      };
+      request.onsuccess = (e) => {
+        console.log("indexedDB opened correctly");
+        db = e.target.result;
+      };
+    }
 
-        // setup summary el
-        resultSummaryEl.textContent = `Result of ${currentAlgo.name} (${argArr})`;
-        resultSummaryEl.setAttribute("id", "result-summary");
-        resultSummaryEl.classList.add("header-medium");
+    // cacheResult()
+    // add new document to the appropriate algo collection
+    // key: value should be `args`: `result`
 
-        // setup result value
-        resultValueEl.textContent = result;
-        resultValueEl.classList.add("result-value");
+    // if getCachedResult() is null
+    // invokeAlgo()
+    // cacheResult()
+    // renderResult()
 
-        resultEl.innerHTML = "";
-        resultContainerEl.append(resultSummaryEl, resultValueEl);
-        resultEl.append(resultContainerEl);
+    // const cachedResult = getCachedResult(currentAlgo, currentArgs);
+    // if (cachedResult === null) invokeAlgo(currentAlgo, currentArgs);
+    // else renderResult(cachedResult);
 
-        // update button text to "run again"
-        algoRuntimeButtonEl.setAttribute("value", "Run Again");
+    createDB();
+    invokeAlgo(currentAlgo, currentArgs);
 
-        // clear input fields
-        const argFields = document.querySelectorAll(".argInput");
-        argFields.forEach((element) => (element.value = ""));
-      })
-      .catch((err) => {
-        console.log(err);
+    function processArgs(algo) {
+      const argArr = [];
+
+      // data sanitization (for now - make every argument a number and push to argArr)
+      algo.args.forEach((arg, index) => {
+        const dataType = arg;
+        const inputValueAsStr = document.querySelector(`#arg${index}`).value;
+        // const inputValueTyped = processData(dataType, inputValueAsStr)
+        const inputValueTyped = Number(inputValueAsStr);
+        argArr.push(inputValueTyped);
       });
+
+      return argArr;
+    }
+
+    // invoke algo with args and render result
+    function invokeAlgo(algo, args) {
+      fetch(`/algos/${algo.id}/run`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          args,
+        }),
+      })
+        .then((response) => response.json())
+        .then((result) => renderResult(result))
+        .catch((err) => console.log(err));
+    }
+
+    // render result to #result
+    function renderResult(result) {
+      const resultEl = document.querySelector("#result");
+      const resultContainerEl = document.createElement("div");
+      const resultSummaryEl = document.createElement("p");
+      const resultValueEl = document.createElement("p");
+
+      // setup result container
+      resultContainerEl.setAttribute("id", "result-container");
+
+      // setup summary el
+      resultSummaryEl.textContent = `Result of ${currentAlgo.name} (${currentArgs})`;
+      resultSummaryEl.setAttribute("id", "result-summary");
+      resultSummaryEl.classList.add("header-medium");
+
+      // setup result value
+      resultValueEl.textContent = result;
+      resultValueEl.classList.add("result-value");
+
+      resultEl.innerHTML = "";
+      resultContainerEl.append(resultSummaryEl, resultValueEl);
+      resultEl.append(resultContainerEl);
+
+      // update button text to "run again"
+      algoRuntimeButtonEl.setAttribute("value", "Run Again");
+
+      // clear input fields
+      const argFields = document.querySelectorAll(".argInput");
+      argFields.forEach((element) => (element.value = ""));
+    }
   });
 }
