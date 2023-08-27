@@ -59,7 +59,6 @@ function renderAlgoSelect(algoArr) {
 
   //add eventlistener to dropdownMenuEl
   dropdownMenuEl.addEventListener("change", (e) => {
-    console.log(e.target.value);
     getAlgo(e.target.value);
   });
 }
@@ -169,53 +168,97 @@ function renderAlgoRuntime(currentAlgo) {
   // submit button event listener
   document.querySelector("#submit-button").addEventListener("click", (e) => {
     const currentArgs = processArgs(currentAlgo);
-    let db;
+    const cacheKey = formatKeyToJSON(currentAlgo, currentArgs);
+
+    connectToDB("algoGenerator").then((db) => {
+      // cacheResult(db, { id: cacheKey, result: JSON.stringify("test") });
+      getCachedResult(db, cacheKey).then(({ result }) => {
+        if (result === null) {
+          console.log("not hitting cache");
+          invokeAlgo(currentAlgo, currentArgs);
+        } else {
+          console.log(`hit the cache!  result: ${result}`);
+          const resultNum = parseInt(result);
+          renderResult(resultNum);
+        }
+      });
+    });
 
     // getCachedResult()
+    // inputs: db, (key eventually)
+    // returns: Promise - resolves to result
+    function getCachedResult(db, key) {
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction("cachedResults", "readonly");
+        const cachedResults = transaction.objectStore("cachedResults");
 
-    function getCachedResult(algoID, args) {
-      // check that DB exists - if not, createDB()
-      // get result from DB, and return that value
-      // if no document exists, return null
+        // const key = "2-2";
+        const getRequest = cachedResults.get(key);
+
+        getRequest.onerror = (e) => {
+          reject(e.target.error);
+        };
+
+        getRequest.onsuccess = (e) => {
+          if (!e.target.result) resolve({ result: null });
+          else resolve(e.target.result);
+        };
+      });
     }
 
-    // create a DB
-    function createDB() {
-      const request = window.indexedDB.open("algoGeneratorDB");
-      request.onerror = (e) => {
-        console.log(
-          "an error occurred while opening the indexedDB:",
-          e.target.errorCode
-        );
-      };
+    // connects to the indexedDB database
+    // input: database name ('algoGenerator')
+    // returns: Promise - resolves to db
+    function connectToDB(dbName) {
+      return new Promise((resolve, reject) => {
+        const request = window.indexedDB.open(dbName);
+
+        // error handling
+        request.onerror = (e) => {
+          reject(e.target.error);
+        };
+
+        request.onsuccess = (e) => {
+          const db = e.target.result;
+          resolve(db);
+        };
+
+        // runs when first creating database
+        // creates object store for cachedResults
+        request.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          // create new object Store to hold cached results
+          const objectStore = db.createObjectStore("cachedResults", {
+            keyPath: "id",
+          });
+        };
+      });
+    }
+
+    function cacheResult(db, { id, result }) {
+      const transaction = db.transaction("cachedResults", "readwrite");
+      const cachedResults = transaction.objectStore("cachedResults");
+
+      const request = cachedResults.add({ id, result });
+
       request.onsuccess = (e) => {
-        console.log("indexedDB opened correctly");
-        db = e.target.result;
+        console.log("newResult added to store:", request.result);
+      };
+
+      request.onerror = (e) => {
+        console.log("error adding result:", request.error);
       };
     }
 
-    // cacheResult()
-    // add new document to the appropriate algo collection
-    // key: value should be `args`: `result`
-
-    // if getCachedResult() is null
-    // invokeAlgo()
-    // cacheResult()
-    // renderResult()
-
-    // const cachedResult = getCachedResult(currentAlgo, currentArgs);
-    // if (cachedResult === null) invokeAlgo(currentAlgo, currentArgs);
-    // else renderResult(cachedResult);
-
-    createDB();
-    invokeAlgo(currentAlgo, currentArgs);
-
+    // process Args
+    // input: current algo (references args property)
+    // output: an array containing each argument coerced to a number
     function processArgs(algo) {
       const argArr = [];
 
       // data sanitization (for now - make every argument a number and push to argArr)
       algo.args.forEach((arg, index) => {
-        const dataType = arg;
+        // const dataType = arg;
         const inputValueAsStr = document.querySelector(`#arg${index}`).value;
         // const inputValueTyped = processData(dataType, inputValueAsStr)
         const inputValueTyped = Number(inputValueAsStr);
@@ -223,6 +266,12 @@ function renderAlgoRuntime(currentAlgo) {
       });
 
       return argArr;
+    }
+
+    // formats the algo and args into a unique id for DB
+    // algo.id-args, ex. '1-5' or '3-[5,6]'
+    function formatKeyToJSON(algo, args) {
+      return JSON.stringify(`${algo.id}-${args}`);
     }
 
     // invoke algo with args and render result
@@ -237,7 +286,12 @@ function renderAlgoRuntime(currentAlgo) {
         }),
       })
         .then((response) => response.json())
-        .then((result) => renderResult(result))
+        .then((result) => {
+          connectToDB("algoGenerator").then((db) => {
+            cacheResult(db, { id: cacheKey, result });
+          });
+          renderResult(result);
+        })
         .catch((err) => console.log(err));
     }
 

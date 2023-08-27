@@ -21,3 +21,10 @@ const fibonacciNumber = {
 };
 
 module.exports = fibonacciNumber;
+
+// slowfunc: (num) => {
+//   if(num<=1){
+//       return num;
+//   }
+//   return fib(num-1) + fib(num-2)
+// };
