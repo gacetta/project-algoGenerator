@@ -58,4 +58,4 @@ algoController.runAlgo = (req, res, next) => {
   }
 };
 
-module.exports = algoController;
+module.exports = { algoController, algos };

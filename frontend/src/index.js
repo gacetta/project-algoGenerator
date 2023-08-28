@@ -1,5 +1,5 @@
-let currentAlgo;
-getAllAlgos();
+// let currentAlgo;
+// getAllAlgos();
 
 function getAllAlgos() {
   fetch("/algos")
@@ -12,6 +12,16 @@ function getAllAlgos() {
     });
 }
 
+// REFACTOR of getAllAlgos()
+// should fetch and return all algorithms
+// inputs: none
+// output: array of algorithm objects (NOTE: funcBody will not send via JSON)
+async function getAllAlgosASYNC() {
+  const response = await fetch("http://localhost:3000/algos");
+  const allAlgos = await response.json();
+  return allAlgos;
+}
+
 function getAlgo(id) {
   fetch(`/algos/${id}`)
     .then((response) => response.json())
@@ -22,6 +32,16 @@ function getAlgo(id) {
     .catch((e) => {
       console.log(e);
     });
+}
+
+// REFACTOR of getAlgo(id)
+// should fetch a return a requested algorith
+// inputs: id (string)
+// output: algorithm object (NOTE: funcBody will not send via JSON)
+async function getAlgoById(id) {
+  const response = await fetch(`http://localhost:3000/algos/${id}`);
+  const requestedAlgo = await response.json();
+  return requestedAlgo;
 }
 
 // render dropdown to select algorithm
@@ -327,3 +347,14 @@ function renderAlgoRuntime(currentAlgo) {
     }
   });
 }
+
+module.exports = {
+  getAllAlgos,
+  getAllAlgosASYNC,
+  getAlgo,
+  getAlgoById,
+  generateOptionEl,
+  renderAlgoSelect,
+  renderDescription,
+  renderAlgoRuntime,
+};
