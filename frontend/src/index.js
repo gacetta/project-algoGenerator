@@ -1,5 +1,5 @@
-// let currentAlgo;
-// getAllAlgos();
+let currentAlgo;
+getAllAlgos();
 
 function getAllAlgos() {
   fetch("/algos")
@@ -195,6 +195,7 @@ function renderAlgoRuntime(currentAlgo) {
       getCachedResult(db, cacheKey).then(({ result }) => {
         if (result === null) {
           console.log("not hitting cache");
+          console.log("currentArgs;", currentArgs);
           invokeAlgo(currentAlgo, currentArgs);
         } else {
           console.log(`hit the cache!  result: ${result}`);
@@ -297,7 +298,7 @@ function renderAlgoRuntime(currentAlgo) {
     // invoke algo with args and render result
     function invokeAlgo(algo, args) {
       fetch(`/algos/${algo.id}/run`, {
-        method: "PUT",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },

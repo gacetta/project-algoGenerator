@@ -19,7 +19,6 @@ const fibonacciNumber = {
   //   return a;
   // },
   funcBody: function (num) {
-    console.log("num:", num);
     if (num <= 1) return num;
     return this.funcBody(num - 1) + this.funcBody(num - 2);
   },
