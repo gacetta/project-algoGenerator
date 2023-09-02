@@ -16,18 +16,15 @@ mongoose
   .catch((err) => console.log(err));
 
 // create a schema for each algo
-// should contain:
-// _id (an automatically generated mongoDB ObjectID)
-// name: String
-// description: String
-// args: an array of String
-// funcBody: a function
+// TODO - funcBody: a function
 const Schema = mongoose.Schema;
 
 const algoSchema = new Schema({
   name: { type: String, required: true },
   description: { type: String },
-  args: [{ type: String }],
+  arguments: [{ type: String }],
+  funcParams: [{ type: String, required: true }],
+  funcBody: { type: String, required: true },
 });
 
 const Algo = mongoose.model("algo", algoSchema);
