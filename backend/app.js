@@ -1,30 +1,18 @@
 const express = require("express");
 const path = require("path");
-const { algoController } = require("./controllers/algoController");
+// const { algoController } = require("./controllers/algoController");
+const algoRouter = require("./routers/algoRouter");
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Handle requests for static files
 const publicDir = path.resolve(__dirname, "../frontend/public");
 app.use(express.static(publicDir));
 
-// route for getting all algorithms
-app.get("/algos", algoController.getAlgos, (req, res) => {
-  return res.send(res.locals.algos);
-});
-
-// route for getting a specific algorithm
-app.get("/algos/:id", algoController.getAlgo, (req, res) => {
-  return res.send(res.locals.algo);
-});
-
-app.post(
-  "/algos/:id/run",
-  algoController.getAlgo,
-  algoController.runAlgo,
-  (req, res) => res.json(res.locals.result)
-);
+// router for algos
+app.use("/algos", algoRouter);
 
 // catch all route for requests to unknown route
 app.use((req, res) =>
